@@ -4,13 +4,37 @@ import os.path
 def lecArc(nombreA):
     #C:\\Users\\luis8\\Desktop\\ejemplo.txt
     archivo = open(nombreA, "r")
-    numl = int(input("Introduzca la cantidad de datos a leer:"))
     array = []
     cn = 0
-    while cn < numl:
-        linea = archivo.readline()
-        array.append(linea[0])
-        cn = cn + 1
+    ver=True;
+    while ver:
+        numl = input("Introduzca la cantidad de datos a leer:")
+        if(numl.isalpha()):
+            if(numl.upper()=="TODOS"):
+                for linea in archivo.readlines():
+                    array.append(linea[0])
+                ver=False
+            else:
+                print("Error: ingreso una palabra innecesaria")
+                ver=True
+        elif numl.isdigit():
+            if(int(numl)>0):
+                while cn < int(numl):
+                    linea = archivo.readline()
+                    if(linea==""):
+                        print("El numero ingresado supera la cantidad de valores en el documento, por lo tanto se trabajara con todo el documento")
+                        cn=int(numl)
+                    else:
+                        array.append(linea[0])
+                        cn = cn + 1
+                ver=False;
+            else:
+                print("Error: ingreso un numero negativo")
+                ver=True
+        else:
+            print("Error: se ingreso un caracter innecesario")
+            ver = True
+
     print(array)
     archivo.close()
     return array
@@ -42,8 +66,8 @@ def escRes(dicR,arrN):
             archivo3.write("\n")
         archivo3.close()
 
-#ingnom=input("Ingrese el nombre del archivo: ")
-#lecArc(ingnom)
+ingnom=input("Ingrese el nombre del archivo: ")
+lecArc(ingnom)
 #crearArc()
 nom=["Primero","Segundo","Tercero"]
 val={}
