@@ -45,7 +45,7 @@ def crearArc():
     i = 0
     arraya = []
     while (i < int(numc)):
-        na = random.randint(1, 4)
+        na = random.randint(1, 100)
         arraya.append(na)
         i = i + 1
     for n in arraya:
