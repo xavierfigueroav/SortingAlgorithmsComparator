@@ -8,7 +8,7 @@ def lecArc(nombreA):
     cn = 0
     ver=True;
     while ver:
-        numl = input("Introduzca la cantidad de datos a leer:")
+        numl = input("Introduzca la cantidad de datos a leer(si se escribe la palabra todos entonces se usara todo el archivo):")
         if(numl.isalpha()):
             if(numl.upper()=="TODOS"):
                 for linea in archivo.readlines():
