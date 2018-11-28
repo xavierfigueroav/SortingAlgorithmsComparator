@@ -1,5 +1,8 @@
 import random
 import os.path
+import Algortimos as al
+
+
 
 def lecArc(nombreA):
     #C:\\Users\\luis8\\Desktop\\ejemplo.txt
@@ -30,7 +33,7 @@ def lecArc(nombreA):
                 ver=False;
             else:
                 print("Error: ingreso un numero negativo")
-                ver=True
+                ver=True 
         else:
             print("Error: se ingreso un caracter innecesario")
             ver = True
@@ -66,15 +69,26 @@ def escRes(dicR,arrN):
             archivo3.write("\n")
         archivo3.close()
 
-ingnom=input("Ingrese el nombre del archivo: ")
-lecArc(ingnom)
+
+#ingnom=input("Ingrese el nombre del archivo: ")
+arrT=crearArc()
+#dicr=al.insertionsort(arrT)
+n=0
+#al.SortingAlg.mergeSort(arrT)
+#(al.SortingAlg.dicms)
+print(arrT)
+al.SortingAlg.quicksort(arrT)
+print(al.SortingAlg.dicqs)
+#al.SortingAlg.stoogesort(arrT,0,len(arrT)-1)
+#print(dicr)
 #crearArc()
-nom=["Primero","Segundo","Tercero"]
-val={}
-val[2]=[1,2,3]
-val[3]=[2,7,2]
-val[4]=[3,8,5]
-val[5]=[4,9,6]
-escRes(val,nom)
+#nom=["Primero","Segundo","Tercero"]
+#val={}
+#val[2]=[1,2,3]
+#val[3]=[2,7,2]
+#val[4]=[3,8,5]
+#val[5]=[4,9,6]
+#escRes(val,nom)
+
 
 
