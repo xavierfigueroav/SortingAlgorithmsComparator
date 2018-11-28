@@ -28,7 +28,6 @@ class SortingAlg:
             if(n%10==0):
                 milis2=time.time()
                 dict[n]=milis2-milis
-                milis=milis2
             key=A[j]
             i=j-1
             while i>(-1) and A[i]>key:
@@ -48,7 +47,6 @@ class SortingAlg:
                 SortingAlg.tfms=time.time()
                 print(SortingAlg.nms)
                 SortingAlg.dicms[SortingAlg.nms]=SortingAlg.tfms-SortingAlg.tims
-                SortingAlg.tims=SortingAlg.tfms
         if(SortingAlg.nms==100):
             print(SortingAlg.dicms)
         if len(alist) > 1:
@@ -93,7 +91,6 @@ class SortingAlg:
                 SortingAlg.tfqs = time.time()
                 print(SortingAlg.nqs)
                 SortingAlg.dicqs[SortingAlg.nqs] = SortingAlg.tfqs - SortingAlg.tiqs
-                SortingAlg.tiqs = SortingAlg.tfqs
 
         if first<last:
             splitpoint = SortingAlg.partition(alist,first,last)
@@ -102,7 +99,6 @@ class SortingAlg:
                 SortingAlg.tfqs = time.time()
                 print(SortingAlg.nqs)
                 SortingAlg.dicqs[SortingAlg.nqs] = SortingAlg.tfqs - SortingAlg.tiqs
-                SortingAlg.tiqs = SortingAlg.tfqs
             SortingAlg.quickSortHelper(alist,first,splitpoint-1)
             SortingAlg.quickSortHelper(alist,splitpoint+1,last)
 
