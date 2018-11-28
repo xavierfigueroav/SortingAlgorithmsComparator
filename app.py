@@ -1,102 +1,248 @@
 from tkinter import *
-from tkinter import filedialog, Frame
+from tkinter.ttk import Separator
+from tkinter import filedialog, messagebox
 from matplotlib import pyplot as plt
 from random import randint
 
 ALGORITHMS = ['InsertionSort', 'MergeSort', 'QuickSort', 'StoogeSort']
 
 
-class MainLayout(Frame):
-    def __init__(self, master=None):
+class MainFrame(Frame):
+    def __init__(self, master):
         super().__init__(master)
         self.master = master
-        self.pack()
+        self.pack(anchor=CENTER, expand=True)
         self.setFrames()
 
     def setFrames(self):
-        self.fileFrame = FileFrame(self)
+
+        self.filePathFrame = self.createPathField()
+        self.filePathFrame.grid(row=0)
+
+        Separator(self).grid(row=1, sticky='ew')
+
+        self.option = IntVar()
+        self.optionsFrame = Frame(self)
+        self.rb1 = Radiobutton(self.optionsFrame, text='Use an existing file', variable=self.option, command=self.handleOptionSelected, value=1)
+        self.rb1.select()
+        self.rb1.pack(side=LEFT)
+
+        self.rb2 = Radiobutton(self.optionsFrame, text='Use a generated file', variable=self.option, command=self.handleOptionSelected, value=2)
+        self.rb2.pack(side=LEFT)
+
+        self.optionsFrame.grid(row=2)
+
+        self.frame2 = GeneratedFileOptionFrame(self, self.filePathFrame.children.get('!text'))
+        self.frame2.grid(row=3)
+
+        self.frame1 = ExistingFileOptionFrame(self, self.filePathFrame.children.get('!text'))
+        self.frame1.grid(row=3)
+
+        Separator(self).grid(row=5, sticky='ew')
+
         self.algorithmsFrame = AlgorithmsFrame(self)
-        self.fileFrame.pack()
-        self.fileFrame.pack()
+        self.algorithmsFrame.grid(row=6)
         self.cretateRunButton()
-        self.runButton.pack()
+        self.runButton.grid(row=7)
+
+        for row in range(self.grid_size()[1]):
+            self.grid_rowconfigure(row, minsize=10)
+
+    def createPathField(self):
+        frame = Frame(self)
+        Label(frame, text='File').grid(row=0, column=0)
+        Text(frame, state='disable', width=40, height=1, bg='#f0f0f0', fg='green', font='Arial 10 bold').grid(row=0, column=1)
+
+        return frame
 
     def cretateRunButton(self):
         self.runButton = Button(self, width=10, height=2)
-        self.runButton["text"] = "Run"
+        self.runButton["text"] = "Compare"
         self.runButton["command"] = self.runVisualization
 
     def runVisualization(self):
-        # plot test
-        plt.plot([1, 2, 3, 4], [1, 4, 9, 16])
-        plt.plot([1, 2, 3, 4], [1, 2, 3, 4])
+        checkedAlgorithms = []
+
+        for value, ck in self.algorithmsFrame.checkBoxes:
+            if value.get():
+                checkedAlgorithms.append(ck.cget('text'))
+
+        if len(checkedAlgorithms) == 0:
+            messagebox.showerror("No algorithm error", "You have to check one algorithm at least")
+            return
+
+        filePath = self.filePathFrame.children.get('!text').get(1.0, 'end-1c')
+
+        if not filePath:
+            messagebox.showerror("No file error", "You have to choose or generate a file")
+            return
+
+        if self.option.get() == 1 and self.frame1.option.get() == 2:
+            if not self.frame1.userSizeField.get(1.0, 'end-1c').isdigit():
+                messagebox.showerror("Invalid value", "You have to enter an integer value")
+                return
+
+        values = {}
+        n = []
+
+        with open(filePath, 'r', encoding='utf-8') as file:
+            heading = file.readline().strip().split(',')
+            values = {i: (e, []) for i, e in enumerate(heading) if i != 0}
+            for line in file:
+                line = line.strip()
+                fields = line.split(',')
+                for i, field in enumerate(fields):
+                    if i != 0:
+                        values[i][1].append(int(field))
+                    else:
+                        n.append(int(field))
+
+        for k, v in values.items():
+            y_name = v[0]
+            y_values = v[1]
+            plt.rcParams['toolbar'] = 'None'
+            plt.figure(num='Sorting Algorithms Comparator')
+            plt.plot(n, y_values, label=y_name)
+            plt.legend()
+        plt.ylabel('time')
+        plt.xlabel('n')
         plt.show()
 
+    def handleOptionSelected(self):
+        if self.option.get() == 1:
+            self.frame1.grid(row=3)
+            self.frame2.grid_forget()
+        else:
+            self.frame2.grid(row=3)
+            self.frame1.grid_forget()
 
-class FileFrame(Frame):
-    def __init__(self, master=None):
+        target = self.filePathFrame.children.get('!text')
+        target['state'] = 'normal'
+        target.delete(1.0, END)
+        target.insert(1.0, '')
+        target['state'] = 'disable'
+
+
+class ExistingFileOptionFrame(Frame):
+    def __init__(self, master, target):
         super().__init__(master)
         self.master = master
-        self.pack()
-        self.create_widgets()
+        self.createComponents(target)
 
-    def create_widgets(self):
-        self.createPathField()
-        self.createPathButton()
-        self.createGenerateButton()
+    def createComponents(self, target):
+        Button(self, text='Add File', command=lambda: self.handleClick(target)).grid(row=0, column=0)
+        self.createCheckBoxes()
+        for col in range(self.grid_size()[0]):
+            self.grid_columnconfigure(col, minsize=80)
 
-    def createPathField(self):
-        self.pathField = Text(self, state='disable', width=50, height=2)
-        self.pathField.grid(row=0)
-        self.pathField.grid(column=0)
+    def createCheckBoxes(self):
+        self.option = IntVar()
+        rb1 = Radiobutton(self, text="Whole file", variable=self.option, command=self.handleOptionSelected, value=1)
+        rb1.select()
+        rb1.grid(row=0, column=1)
 
-    def createPathButton(self):
-        self.pathButton = Button(self, width=10, height=2)
-        self.pathButton["text"] = "Add file"
-        self.pathButton["command"] = self.askForFile
-        self.pathButton.grid(row=0)
-        self.pathButton.grid(column=1)
+        self.fileSizeField = Text(self, state='disable', width=10, height=1, bg='#f0f0f0', bd=0, font='Arial 10')
+        self.fileSizeField.grid(row=0, column=2)
 
-    def askForFile(self):
-        self.filePath = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("txt files", "*.txt"), ("all files", "*.*")))
-        self.pathField['state'] = 'normal'
-        self.pathField.delete(INSERT, END)
-        self.pathField.insert(INSERT, self.filePath)
-        self.pathField['state'] = 'disable'
+        rb2 = Radiobutton(self, text="This amount", variable=self.option, command=self.handleOptionSelected, value=2)
+        rb2.grid(row=0, column=3)
 
-    def createGenerateButton(self):
-        self.pathButton = Button(self, width=10, height=2)
-        self.pathButton["text"] = "Generate File"
-        self.pathButton["command"] = self.generateFile
-        self.pathButton.grid(row=0)
-        self.pathButton.grid(column=2)
+        self.userSizeField = Text(self, width=10, height=1, bg='#f0f0f0', state='disable', font='Arial 10')
+        self.userSizeField.grid(row=0, column=4)
 
-    def generateFile(self):
-        with open('generated.txt', 'w', encoding='utf-8') as file:
-            for i in range(100):
+    def handleOptionSelected(self):
+        if self.option.get() == 1:
+            self.userSizeField['state'] = 'disable'
+            self.userSizeField.config(bg='#f0f0f0')
+        else:
+            self.userSizeField['state'] = 'normal'
+            self.userSizeField.config(bg='white')
+
+    def handleClick(self, target):
+        filePath = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("txt files", "*.txt"), ("all files", "*.*")))
+        self.changeTargetText(target, filePath)
+
+    def changeTargetText(self, target, text):
+        target['state'] = 'normal'
+        target.delete(1.0, END)
+        target.insert(1.0, text.lower())
+        target['state'] = 'disable'
+
+
+class GeneratedFileOptionFrame(Frame):
+    def __init__(self, master, target):
+        super().__init__(master)
+        self.master = master
+        self.createComponents(target)
+
+    def createComponents(self, target):
+        self.inputSizeField = self.createInputSizeField()
+        Button(self, text='Generate File', command=lambda: self.handleClick(target)).grid(row=0, column=2)
+        self.grid_columnconfigure(2, minsize=120)
+
+    def createInputSizeField(self):
+        Label(self, text='Input size').grid(row=0, column=0)
+        self.inputField = Text(self, width=10, height=1, font='Arial 10')
+        self.inputField.grid(row=0, column=1)
+        self.grid_columnconfigure(0, minsize=80)
+        self.grid_columnconfigure(1, minsize=80)
+        return self.inputField
+
+    def handleClick(self, target):
+        input = self.inputField.get(1.0, 'end-1c')
+
+        if not input.isdigit() or int(input) < 20:
+            messagebox.showerror("Invalid value", "You have to enter an integer value greater than 50")
+            return
+
+        filePath = 'generated%d.txt' % randint(100, 1000)
+
+        with open(filePath, 'w', encoding='utf-8') as file:
+            for i in range(int(input)):
                 file.write("%d\n" % randint(-100,100))
+
+        self.changeTargetText(target, filePath)
+
+    def changeTargetText(self, target, text):
+        target['state'] = 'normal'
+        target.delete(1.0, END)
+        target.insert(1.0, text)
+        target['state'] = 'disable'
 
 
 class AlgorithmsFrame(Frame):
-    def __init__(self, master=None):
+    def __init__(self, master):
         super().__init__(master)
         self.master = master
-        self.pack()
-        self.create_widgets()
-
-    def create_widgets(self):
         self.createCheckBoxes()
 
     def createCheckBoxes(self):
-        self.checkboxes = []
+        self.checkBoxes = []
 
         for i, algorithm in enumerate(ALGORITHMS):
-            check = Checkbutton(self, text=algorithm)
-            check.grid(row=0)
-            check.grid(column=i)
-            self.checkboxes.append(check)
+            v = BooleanVar()
+            v.set(True)
+
+            ck = Checkbutton(self, text=algorithm, var=v, onvalue=True, offvalue=False)
+            ck.grid(column=i, row=0)
+
+            self.checkBoxes.append((v, ck))
+
+
+def stylizeWindow(window, title='Window', window_width=500, window_height=500):
+    if window:
+        window.title(title)
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+
+        x_cordinate = int((screen_width / 2) - (window_width / 2))
+        y_cordinate = int((screen_height / 2) - ((window_height + 20) / 2))
+
+        window.geometry("%dx%d+%d+%d" % (window_width, window_height, x_cordinate, y_cordinate))
 
 
 window = Tk()
-app = MainLayout(master=window)
+stylizeWindow(window, 'Sorting Algorithms Comparator', 600, 300)
+
+app = MainFrame(master=window)
 app.mainloop()
