@@ -3,46 +3,25 @@ import os.path
 import Algoritmos as al
 
 
-
-def lecArc(nombreA):
-    #C:\\Users\\luis8\\Desktop\\ejemplo.txt
+def lecArc(nombreA, inputSize, whole=True):
     archivo = open(nombreA, "r")
+    lines = archivo.readlines()
+    archivo.close()
     array = []
     cn = 0
-    ver=True;
-    while ver:
-        numl = input("Introduzca la cantidad de datos a leer(si se escribe la palabra todos entonces se usara todo el archivo):")
-        if(numl.isalpha()):
-            if(numl.upper()=="TODOS"):
-                for linea in archivo.readlines():
-                    array.append(linea[0])
-                ver=False
-            else:
-                print("Error: ingreso una palabra innecesaria")
-                ver=True
-        elif numl.isdigit():
-            if(int(numl)>0):
-                while cn < int(numl):
-                    linea = archivo.readline()
-                    if(linea==""):
-                        print("El numero ingresado supera la cantidad de valores en el documento, por lo tanto se trabajara con todo el documento")
-                        cn=int(numl)
-                    else:
-                        array.append(linea[0])
-                        cn = cn + 1
-                ver=False;
-            else:
-                print("Error: ingreso un numero negativo")
-                ver=True
-        else:
-            print("Error: se ingreso un caracter innecesario")
-            ver = True
 
-    print(array)
-    archivo.close()
+    if whole:
+        for linea in lines:
+            linea = linea.strip()
+            array.append(int(linea))
+    else:
+        while cn < inputSize and cn < len(lines):
+            linea = lines[cn].strip()
+            array.append(int(linea))
+            cn = cn + 1
     return array
 
-def crearArc():
+def crearArc(path, size):
     archivo2 = open("aleatorio.txt", "w+")
     numc = input("Introduzca la cantidad de datos a crear:")
     i = 0
@@ -118,6 +97,8 @@ def crearDicr(ins,sto,mer,qui):
                 dicR[n] =al.SortingAlg.dicsts[n]
     return dicR
 
+
+"""
 #ingnom=input("Ingrese el nombre del archivo: ")
 arrT=crearArc()
 
@@ -136,3 +117,4 @@ print(res)
 nom=["Insertion","Quicsort","MergeSort"]
 escRes(res,nom)
 #al.SortingAlg.stoogesort(arrT,0,len(arrT)-1)
+"""

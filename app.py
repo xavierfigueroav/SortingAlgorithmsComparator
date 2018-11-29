@@ -3,9 +3,10 @@ from tkinter.ttk import Separator
 from tkinter import filedialog, messagebox
 from matplotlib import pyplot as plt
 from random import randint
+import platform
 
 ALGORITHMS = ['InsertionSort', 'MergeSort', 'QuickSort', 'StoogeSort']
-
+SYSTEM_DESCRIPTION = "%s\n%s\nPython %s" % (platform.platform(), platform.processor(), platform.python_version())
 
 class MainFrame(Frame):
     def __init__(self, master):
@@ -106,6 +107,8 @@ class MainFrame(Frame):
             plt.legend()
         plt.ylabel('time')
         plt.xlabel('n')
+        plt.text(3, 8, SYSTEM_DESCRIPTION,
+                bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
         plt.show()
 
     def handleOptionSelected(self):

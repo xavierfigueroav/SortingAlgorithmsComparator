@@ -1,3 +1,4 @@
 .idea
 test.py
 testResults.txt
+__pycache__
