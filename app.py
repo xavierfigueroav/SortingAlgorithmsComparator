@@ -2,10 +2,10 @@ from tkinter import *
 from tkinter.ttk import Separator
 from tkinter import filedialog, messagebox
 from matplotlib import pyplot as plt
-from random import randint
 import platform
+from FileManager import *
 
-ALGORITHMS = ['InsertionSort', 'MergeSort', 'QuickSort', 'StoogeSort']
+ALGORITHMS = ['InsertionSort', 'MergeSort', 'QuickSort']
 SYSTEM_DESCRIPTION = "%s\n%s\nPython %s" % (platform.platform(), platform.processor(), platform.python_version())
 
 class MainFrame(Frame):
@@ -62,11 +62,12 @@ class MainFrame(Frame):
         self.runButton["command"] = self.runVisualization
 
     def runVisualization(self):
-        checkedAlgorithms = []
+
+        checkedAlgorithms = set()
 
         for value, ck in self.algorithmsFrame.checkBoxes:
             if value.get():
-                checkedAlgorithms.append(ck.cget('text'))
+                checkedAlgorithms.add(ck.cget('text'))
 
         if len(checkedAlgorithms) == 0:
             messagebox.showerror("No algorithm error", "You have to check one algorithm at least")
@@ -78,15 +79,24 @@ class MainFrame(Frame):
             messagebox.showerror("No file error", "You have to choose or generate a file")
             return
 
+        userSize = ""
         if self.option.get() == 1 and self.frame1.option.get() == 2:
-            if not self.frame1.userSizeField.get(1.0, 'end-1c').isdigit():
-                messagebox.showerror("Invalid value", "You have to enter an integer value")
+            userSize = self.frame1.userSizeField.get(1.0, 'end-1c')
+            if not userSize.isdigit() or int(userSize) < 50:
+                messagebox.showerror("Invalid value", "You have to enter an integer value greater than 50")
                 return
+        if self.option.get() == 1:
+            if self.frame1.option.get() == 1:
+                readUserFile(filePath, True)
+            else:
+                readUserFile(filePath, False, int(userSize))
 
         values = {}
         n = []
 
-        with open(filePath, 'r', encoding='utf-8') as file:
+        resultsPath = writeResults(checkedAlgorithms)
+
+        with open(resultsPath, 'r', encoding='utf-8') as file:
             heading = file.readline().strip().split(',')
             values = {i: (e, []) for i, e in enumerate(heading) if i != 0}
             for line in file:
@@ -105,7 +115,7 @@ class MainFrame(Frame):
             plt.figure(num='Sorting Algorithms Comparator')
             plt.plot(n, y_values, label=y_name)
             plt.legend()
-        plt.ylabel('time')
+        plt.ylabel('time (microseconds)')
         plt.xlabel('n')
         plt.text(3, 8, SYSTEM_DESCRIPTION,
                 bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
@@ -162,7 +172,7 @@ class ExistingFileOptionFrame(Frame):
             self.userSizeField.config(bg='white')
 
     def handleClick(self, target):
-        filePath = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("txt files", "*.txt"), ("all files", "*.*")))
+        filePath = filedialog.askopenfilename(initialdir=sys.path[0], title="Select file", filetypes=(("txt files", "*.txt"), ("all files", "*.*")))
         self.changeTargetText(target, filePath)
 
     def changeTargetText(self, target, text):
@@ -198,11 +208,7 @@ class GeneratedFileOptionFrame(Frame):
             messagebox.showerror("Invalid value", "You have to enter an integer value greater than 50")
             return
 
-        filePath = 'generated%d.txt' % randint(100, 1000)
-
-        with open(filePath, 'w', encoding='utf-8') as file:
-            for i in range(int(input)):
-                file.write("%d\n" % randint(-100,100))
+        filePath = generateFile(int(input))
 
         self.changeTargetText(target, filePath)
 
@@ -246,6 +252,5 @@ def stylizeWindow(window, title='Window', window_width=500, window_height=500):
 
 window = Tk()
 stylizeWindow(window, 'Sorting Algorithms Comparator', 600, 300)
-
 app = MainFrame(master=window)
 app.mainloop()

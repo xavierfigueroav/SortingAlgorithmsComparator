@@ -1,9 +1,8 @@
-import random
-import os.path
-import Algoritmos as al
+from Algorithms import SortingAlg
+from random import randint
 
 
-def lecArc(nombreA, inputSize, whole=True):
+def readUserFile(nombreA, whole, inputSize=None):
     archivo = open(nombreA, "r")
     lines = archivo.readlines()
     archivo.close()
@@ -19,34 +18,53 @@ def lecArc(nombreA, inputSize, whole=True):
             linea = lines[cn].strip()
             array.append(int(linea))
             cn = cn + 1
-    return array
+    SortingAlg.array = array
+    return len(array)
 
-def crearArc(path, size):
-    archivo2 = open("aleatorio.txt", "w+")
-    numc = input("Introduzca la cantidad de datos a crear:")
-    i = 0
-    arraya = []
-    while (i < int(numc)):
-        na = random.randint(1, 200)
-        arraya.append(na)
-        i = i + 1
-    for n in arraya:
-        archivo2.write(str(n) + "\n")
-    archivo2.close()
-    return arraya
 
-def escRes(dicR,arrN):
-        archivo3 = open("resultados.txt", "w")
-        archivo3.write("n")
-        for nombre in arrN:
-            archivo3.write("    "+nombre)
-        archivo3.write("\n")
-        for n in dicR:
-            archivo3.write(str(n))
-            for valro in dicR[n]:
-                archivo3.write("         "+str(valro))
-            archivo3.write("\n")
-        archivo3.close()
+def generateFile(size):
+
+    path = 'generated%d.txt' % randint(100, 1000)
+
+    array = []
+
+    with open(path, 'w', encoding='utf-8') as file:
+        for i in range(size):
+            n = randint(-100, 100)
+            array.append(n)
+            file.write("%d\n" % n)
+    SortingAlg.array = array
+
+    return path
+
+
+def writeResults(agthms):
+    path = "results%d.txt" % randint(100, 1000)
+    file = open(path, "w", encoding='utf-8')
+    file.write("n,")
+    file.write(",".join(agthms))
+    file.write('\n')
+
+    SortingAlg.insertionsort(SortingAlg.array.copy())
+    SortingAlg.mergeSort(SortingAlg.array.copy())
+    SortingAlg.quicksort(SortingAlg.array.copy())
+
+    any = agthms.pop()
+    inputs = SortingAlg.agthms[any].keys()
+    agthms.add(any)
+
+    for n in inputs:
+        file.write(str(n))
+        for k, v in SortingAlg.agthms.items():
+            if k in agthms:
+                file.write(",%d" % v[n])
+        file.write('\n')
+    file.close()
+    SortingAlg.reset()
+    return path
+
+
+"""
 
 def crearDicr(ins,sto,mer,qui):
     dicR={}
@@ -98,10 +116,6 @@ def crearDicr(ins,sto,mer,qui):
     return dicR
 
 
-"""
-#ingnom=input("Ingrese el nombre del archivo: ")
-arrT=crearArc()
-
 
 i=arrT.copy()
 al.SortingAlg.insertionsort(i)
@@ -117,4 +131,5 @@ print(res)
 nom=["Insertion","Quicsort","MergeSort"]
 escRes(res,nom)
 #al.SortingAlg.stoogesort(arrT,0,len(arrT)-1)
+
 """
